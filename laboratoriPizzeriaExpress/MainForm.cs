@@ -27,13 +27,17 @@ namespace laboratoriPizzeriaCampusExpress
             string cliente = txtCliente.Text.Trim();
 
             // Validar entrada
-            
+            if(string.IsNullOrEmpty(cliente))
+            {
+            	lblEstado.Text = string.Format("Error: el nombre del cliente no puede estar vacio.");
+            	return;
+            }
 
             // Agregar a la cola
-            
+            colaPedidos.Enqueue(cliente);
 
             // Registrar en la pila
-            
+            pilaBitacora.Push(string.Format("PEDIDO: {0}", cliente));
 
             // Limpiar campo y actualizar
             txtCliente.Clear();
@@ -49,7 +53,12 @@ namespace laboratoriPizzeriaCampusExpress
                 lblEstado.Text = string.Format("❌ No hay pedidos pendientes.");
                 return;
             }
-
+            
+            string entregado = (string)colaPedidos.Dequeue();
+            
+            pilaBitacora.Push(string.Format("ENTREGADO: {0}", entregado));
+            
+           
             string cliente = colaPedidos.Dequeue();
             pilaBitacora.Push(string.Format("ENTREGADO: {0}", cliente));
             lblEstado.Text = string.Format("🍕 Pedido entregado a {0}", cliente);
@@ -70,8 +79,10 @@ namespace laboratoriPizzeriaCampusExpress
             if (ultimaAccion.StartsWith("PEDIDO:"))
             {
                 // Extraer nombre del cliente
+                string nombre = ultimaAccion.Replace("ENTREGADO:", "").Trim();
                 
                 // Reconstruir cola excluyendo ese pedido
+                string[] temporal = colaPedidos.ToArray();
                
                 colaPedidos.Clear();
                 foreach (string p in temporal)
@@ -84,9 +95,11 @@ namespace laboratoriPizzeriaCampusExpress
             else if (ultimaAccion.StartsWith("ENTREGADO:"))
             {
                 // Extraer nombre del cliente
+                string nombre = ultimaAccion.Replace("ENTREGADO:", "").Trim();
                
                 // Volver a encolar
-               
+                colaPedidos.Enqueue(nombre);
+                
                 lblEstado.Text = string.Format("↩️ Se deshizo la entrega a {0}", nombre);
             }
             else
